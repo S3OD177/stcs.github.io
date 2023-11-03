@@ -71,16 +71,23 @@ function analyzeText(apiToken, text) {
             'Authorization': `Bearer ${apiToken}`
         },
         body: JSON.stringify({
-            prompt: "Analyze the following data: \n" + text,
-            temperature: 0.5,
-            max_tokens: 100,
-            n: 1,
-            stop: ["\n", " Human:"],
+            model: "gpt-3.5-turbo",
+            messages: [
+                {
+                    role: "system",
+                    content: "You are a helpful assistant."
+                },
+                {
+                    role: "user",
+                    content: text
+                }
+            ],
         })
     })
     .then(response => response.json())
     .then(data => {
-        document.getElementById('resultContainer').textContent = JSON.stringify(data, null, 2);
+        // Assuming the response includes a message array with at least one element
+        document.getElementById('resultContainer').textContent = data.choices[0].message.content;
     })
     .catch(error => {
         alert('Error communicating with OpenAI API');
