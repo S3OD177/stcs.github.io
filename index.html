@@ -64,24 +64,38 @@
         });
 
 function analyzeText(apiToken, text) {
-    const url = 'https://api.openai.com/v1/chat/completions';
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiToken}`
-    };
-    const body = JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{
-            role: "system",
-            content: "You are a helpful assistant."
-        }, {
-            role: "user",
-            content: text
-        }],
-    });
-
+var myHeaders = new Headers();
+myHeaders.append("Content-Type", "application/json");
+myHeaders.append("Authorization", "Bearer sess-Yh4MZBEGMEE63moi1ep8TxAdEOSueXcTMwMHKL2q");
+    
+var raw = JSON.stringify({
+  "messages": [
+    {
+      "role": "system",
+      "content": "You help users analyze their data."
+    },
+    {
+      "role": "user",
+      "content": text
+    }
+  ],
+  "temperature": 1,
+  "max_tokens": 256,
+  "top_p": 1,
+  "frequency_penalty": 0,
+  "presence_penalty": 0,
+  "model": "gpt-3.5-turbo",
+  "stream": true
+});
+    
+var requestOptions = {
+  method: 'POST',
+  headers: myHeaders,
+  body: raw,
+  redirect: 'follow'
+};
     const makeRequest = (retryAfter = 1) => {
-        fetch(url, { method: 'POST', headers, body })
+fetch("https://api.openai.com/v1/chat/completions", requestOptions)
         .then(response => {
             if (response.status === 429) {
                 const wait = response.headers.get('Retry-After') || retryAfter * 2; // Use Retry-After or double the wait
