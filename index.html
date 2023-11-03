@@ -63,30 +63,30 @@
             reader.readAsArrayBuffer(fileInput.files[0]);
         });
 
-        function analyzeText(apiToken, text) {
-            fetch('https://api.openai.com/v1/engines/davinci-codex/completions', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${apiToken}`
-                },
-                body: JSON.stringify({
-                    prompt: "Analyze the following data: \n" + text,
-                    temperature: 0.5,
-                    max_tokens: 100,
-                    n: 1,
-                    stop: ["\n", " Human:"],
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                document.getElementById('resultContainer').textContent = JSON.stringify(data, null, 2);
-            })
-            .catch(error => {
-                alert('Error communicating with OpenAI API');
-                console.error('Error:', error);
-            });
-        }
+function analyzeText(apiToken, text) {
+    fetch('https://api.openai.com/v1/engines/text-davinci-003/completions', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiToken}`
+        },
+        body: JSON.stringify({
+            prompt: "Analyze the following data: \n" + text,
+            temperature: 0.5,
+            max_tokens: 100,
+            n: 1,
+            stop: ["\n", " Human:"],
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        document.getElementById('resultContainer').textContent = JSON.stringify(data, null, 2);
+    })
+    .catch(error => {
+        alert('Error communicating with OpenAI API');
+        console.error('Error:', error);
+    });
+}
     </script>
 </body>
 </html>
