@@ -31,6 +31,7 @@
     
     <input type="text" id="apiToken" placeholder="Enter OpenAI API Token" />
     <input type="file" id="excelFile" accept=".xlsx, .xls" />
+    <input type="text" id="userQuery" placeholder="Ask a question about the data" /> <!-- New text field for user to ask questions -->
     <button id="analyzeButton">Analyze</button>
     
     <pre id="resultContainer"></pre>
@@ -39,6 +40,7 @@
     <script>
         document.getElementById('analyzeButton').addEventListener('click', function() {
             const apiToken = document.getElementById('apiToken').value;
+            const userQuery = document.getElementById('userQuery').value; // Get the value of the user's query
             const fileInput = document.getElementById('excelFile');
             if (fileInput.files.length === 0) {
                 alert('Please select an Excel file.');
@@ -53,7 +55,7 @@
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     const text = XLSX.utils.sheet_to_csv(worksheet);
-                    analyzeText(apiToken, text);
+                    analyzeText(apiToken, text, userQuery); // Pass user query to the analyzeText function
                 } catch (err) {
                     alert('Error reading the Excel file');
                     console.error(err);
@@ -63,7 +65,7 @@
             reader.readAsArrayBuffer(fileInput.files[0]);
         });
 
-function analyzeText(apiToken, text) {
+function analyzeText(apiToken, text, userQuery) { // Include userQuery in the parameters
     const url = 'https://api.openai.com/v1/chat/completions';
     const headers = {
         'Content-Type': 'application/json',
@@ -77,6 +79,9 @@ function analyzeText(apiToken, text) {
         }, {
             role: "user",
             content: text
+        }, {
+            role: "user",
+            content: userQuery // Send the user's question to the API
         }],
     });
 
