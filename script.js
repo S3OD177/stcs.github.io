@@ -29,8 +29,14 @@
             // Use GPT-4 to analyze the Excel file
             try {
                 const response = await openai.create({
-                    engine: 'gpt-4.0', // Replace with the actual GPT-4 engine identifier
+                    model: 'gpt-4-1106-preview', // Replace with the actual GPT-4 engine identifier
                     prompt: `Analyze the following Excel data: \n${fileText}`,
+                    temperature: 1,
+                    max_tokens: 256,
+                    top_p: 1,
+                    frequency_penalty: 0,
+                    presence_penalty: 0,
+                    stream: true
                 });
 
                 // Display the analysis results
