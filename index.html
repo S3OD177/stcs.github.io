@@ -31,7 +31,7 @@
     
     <input type="text" id="apiToken" placeholder="Enter OpenAI API Token" />
     <input type="file" id="excelFile" accept=".xlsx, .xls" />
-    <input type="text" id="userQuery" placeholder="Ask a question about the data" /> <!-- New text field for user to ask questions -->
+    <input type="text" id="userQuery" placeholder="Ask a question about the data" />
     <button id="analyzeButton">Analyze</button>
     
     <pre id="resultContainer"></pre>
@@ -40,7 +40,7 @@
     <script>
         document.getElementById('analyzeButton').addEventListener('click', function() {
             const apiToken = document.getElementById('apiToken').value;
-            const userQuery = document.getElementById('userQuery').value; // Get the value of the user's query
+            const userQuery = document.getElementById('userQuery').value;
             const fileInput = document.getElementById('excelFile');
             if (fileInput.files.length === 0) {
                 alert('Please select an Excel file.');
@@ -55,7 +55,7 @@
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
                     const text = XLSX.utils.sheet_to_csv(worksheet);
-                    analyzeText(apiToken, text, userQuery); // Pass user query to the analyzeText function
+                    analyzeText(apiToken, text, userQuery);
                 } catch (err) {
                     alert('Error reading the Excel file');
                     console.error(err);
@@ -65,54 +65,53 @@
             reader.readAsArrayBuffer(fileInput.files[0]);
         });
 
-function analyzeText(apiToken, text, userQuery) { // Include userQuery in the parameters
-    const url = 'https://api.openai.com/v1/chat/completions';
-    const headers = {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${apiToken}`
-    };
-    const body = JSON.stringify({
-        model: "gpt-3.5-turbo",
-        messages: [{
-            role: "system",
-            content: "You are a helpful assistant."
-        }, {
-            role: "user",
-            content: text
-        }, {
-            role: "user",
-            content: userQuery // Send the user's question to the API
-        }],
-    });
+        function analyzeText(apiToken, text, userQuery) {
+            const url = 'https://api.openai.com/v1/engines/gpt-4.0-turbo/completions'; // Assumed GPT-4 API endpoint
+            const headers = {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${apiToken}`
+            };
+            const body = JSON.stringify({
+                model: "gpt-4.0-turbo", // Assumed GPT-4 model identifier
+                messages: [{
+                    role: "system",
+                    content: "You are a helpful assistant."
+                }, {
+                    role: "user",
+                    content: text
+                }, {
+                    role: "user",
+                    content: userQuery
+                }],
+            });
 
-    const makeRequest = (retryAfter = 1) => {
-        fetch(url, { method: 'POST', headers, body })
-        .then(response => {
-            if (response.status === 429) {
-                const wait = response.headers.get('Retry-After') || retryAfter * 2; // Use Retry-After or double the wait
-                console.warn(`Rate limited. Retrying after ${wait} seconds.`);
-                setTimeout(() => makeRequest(wait), wait * 1000); // Convert to milliseconds
-            } else if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            } else {
-                return response.json();
-            }
-        })
-        .then(data => {
-            if(data.error) {
-                throw new Error(`API error! message: ${data.error.message}`);
-            }
-            document.getElementById('resultContainer').textContent = data.choices[0].message.content;
-        })
-        .catch(error => {
-            alert('Error communicating with OpenAI API: ' + error.message);
-            console.error('Error:', error);
-        });
-    };
+            const makeRequest = (retryAfter = 1) => {
+                fetch(url, { method: 'POST', headers, body })
+                .then(response => {
+                    if (response.status === 429) {
+                        const wait = response.headers.get('Retry-After') || retryAfter * 2;
+                        console.warn(`Rate limited. Retrying after ${wait} seconds.`);
+                        setTimeout(() => makeRequest(wait), wait * 1000);
+                    } else if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    } else {
+                        return response.json();
+                    }
+                })
+                .then(data => {
+                    if(data.error) {
+                        throw new Error(`API error! message: ${data.error.message}`);
+                    }
+                    document.getElementById('resultContainer').textContent = data.choices[0].message.content;
+                })
+                .catch(error => {
+                    alert('Error communicating with OpenAI API: ' + error.message);
+                    console.error('Error:', error);
+                });
+            };
 
-    makeRequest(); // Initial call
-}
-
+            makeRequest();
+        }
     </script>
 </body>
 </html>
