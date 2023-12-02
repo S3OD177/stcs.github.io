@@ -26,10 +26,10 @@
             // Initialize the OpenAI API client
             const openai = new OpenAI({ key: apiToken });
 
-            // Use GPT-3 to analyze the Excel file
+            // Use GPT-4 to analyze the Excel file
             try {
                 const response = await openai.create({
-                    engine: 'text-davinci-002',
+                    engine: 'gpt-4.0', // Replace with the actual GPT-4 engine identifier
                     prompt: `Analyze the following Excel data: \n${fileText}`,
                 });
 
