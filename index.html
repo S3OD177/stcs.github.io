@@ -30,7 +30,7 @@
     <h1>Excel Sheet Analyzer</h1>
     
     <input type="text" id="apiToken" placeholder="Enter OpenAI API Token" />
-    <input type="file" id="excelFile" accept=".xlsx, .xls" />
+    <input type="file" id="excelFile" accept=".xlsx, .xls" multiple /> <!-- Updated for multiple files -->
     <input type="text" id="userQuery" placeholder="Ask a question about the data" /> <!-- New text field for user to ask questions -->
     <button id="analyzeButton">Analyze</button>
     
@@ -40,29 +40,38 @@
     <script>
     document.getElementById('analyzeButton').addEventListener('click', function() {
         const apiToken = document.getElementById('apiToken').value;
-        const userQuery = document.getElementById('userQuery').value; // Get the value of the user's query
+        const userQuery = document.getElementById('userQuery').value;
         const fileInput = document.getElementById('excelFile');
         if (fileInput.files.length === 0) {
-            alert('Please select an Excel file.');
+            alert('Please select at least one Excel file.');
             return;
         }
-        
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const data = new Uint8Array(e.target.result);
-                const workbook = XLSX.read(data, { type: 'array' });
-                const firstSheetName = workbook.SheetNames[0];
-                const worksheet = workbook.Sheets[firstSheetName];
-                const text = XLSX.utils.sheet_to_csv(worksheet);
-                analyzeText(apiToken, text, userQuery); // Pass user query to the analyzeText function
-            } catch (err) {
-                alert('Error reading the Excel file');
-                console.error(err);
-            }
-        };
-        
-        reader.readAsArrayBuffer(fileInput.files[0]);
+
+        let combinedText = ''; // Variable to combine text from all sheets
+        let filesProcessed = 0; // Track the number of files processed
+
+        Array.from(fileInput.files).forEach(file => {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    workbook.SheetNames.forEach(sheetName => {
+                        const worksheet = workbook.Sheets[sheetName];
+                        combinedText += XLSX.utils.sheet_to_csv(worksheet) + "\n";
+                    });
+                    filesProcessed++;
+                    if (filesProcessed === fileInput.files.length) {
+                        // Once all files are processed, analyze the combined text
+                        analyzeText(apiToken, combinedText, userQuery);
+                    }
+                } catch (err) {
+                    alert('Error reading an Excel file');
+                    console.error(err);
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        });
     });
 
     function analyzeText(apiToken, text, userQuery) { // Include userQuery in the parameters
