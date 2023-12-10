@@ -29,7 +29,7 @@
             // Use GPT-3 to analyze the Excel file
             try {
                 const response = await openai.create({
-                    engine: 'text-davinci-002',
+                    engine: 'gpt-3.5-turbo',
                     prompt: `Analyze the following Excel data: \n${fileText}`,
                 });
 
